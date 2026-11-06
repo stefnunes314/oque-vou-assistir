@@ -39,3 +39,8 @@ export async function descobrirFilmes({generoId, notaMinima, plataformaId}) {
     const dados = await resposta.json()
     return dados
 }
+export async function getCreditos(filmeId){
+  const resposta = await fetch (`${API_URL}/api/filmes/${filmeId}/creditos`)
+  const dados = await resposta.json()
+  return dados
+}

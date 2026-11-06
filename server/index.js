@@ -49,7 +49,27 @@ app.get('/api/generos', async ( req,res) => {
     const dados = await resposta.json()
     res.json(dados.genres)
 })
+app.get('/api/filmes/:id/creditos', async(req, res) =>{
+  const token = process.env.TMDB_TOKEN
+  const {id} = req.params
 
+  const resposta = await fetch(
+    `https://api.themoviedb.org/3/movie/${id}/credits?language=pt-BR`,
+    {
+      headers:{
+        Authorization:`Bearer ${token}`,
+      },
+    }
+  )
+  const dados= await resposta.json()
+
+  const diretores = dados.crew
+  .filter((pessoa)=> pessoa.job==='Director')
+  .map((pessoa)=>pessoa.name)
+
+  const elenco = dados.cast.slice(0,5).map((pessoa)=>pessoa.name)
+  res.json({diretores, elenco})
+})
 app.get('/api/filmes', async (req, res) => {
 const filmes = await buscarFilmesFiltrados(req.query)
 res.json(filmes)

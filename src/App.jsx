@@ -1,7 +1,7 @@
 import { useState, useEffect} from 'react'
 import './App.css'
-import { getGeneros, descobrirFilmes, sortearFilme } from './services/tmdb'
 import cinemaImg from './assets/cinema.png'
+import { getGeneros, descobrirFilmes, sortearFilme, getCreditos } from './services/tmdb'
 
 
 function App() {
@@ -11,6 +11,7 @@ function App() {
   const [notaMinima, setNotaMinima]= useState('')
   const [plataformaId, setPlataformaId]= useState('')
   const [filmeSorteado, setFilmeSorteado] = useState(null)
+  const [creditos, setCreditos]= useState(null)
 
   const top10 = filmes
   .slice()
@@ -42,6 +43,12 @@ function App() {
       plataformaId: plataformaId,
     }).then((filme) => {
       setFilmeSorteado(filme)
+      setCreditos(null)
+      if (filme){
+        getCreditos(filme.id).then((dados)=>{
+          setCreditos(dados)
+        })
+      }
     })
   }
 
@@ -115,6 +122,16 @@ function App() {
                 ⭐ {filmeSorteado.vote_average.toFixed(1)}
               </p>
               <p className="destaque-descricao">{filmeSorteado.overview}</p>
+              {creditos && (
+            <div className="destaque-creditos">
+              <p>
+                 <strong>Direção:</strong> {creditos.diretores.join(', ')}
+             </p>
+             <p>
+               <strong>Elenco:</strong> {creditos.elenco.join(', ')}
+             </p>
+             </div>
+              )}
 
               <button
                 type="button"

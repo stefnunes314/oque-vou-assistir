@@ -361,6 +361,10 @@
   flex: 1; /* ocupa o espaço restante ao lado do pôster */
   min-width: 260px; /* não fica estreito demais */
 }
+.destaque-creditos {
+  margin-bottom: 20px;
+  font-size: 14px;
+}
 
 .destaque-nota {
   font-size: 18px;
