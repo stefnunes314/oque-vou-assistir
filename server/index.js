@@ -1,12 +1,14 @@
 import express from 'express'
 import cors from 'cors'
 import 'dotenv/config'
+import { fileURLToPath } from 'node:url'
 
 const app = express()
 
 
 app.use(cors())
 app.use(express.json())
+app.use(express.static(fileURLToPath(new URL('../dist', import.meta.url))))
 
 async function buscarFilmesFiltrados(filtros) {
   const { generoId, notaMinima, plataformaId, atorId, diretorId, excluir } = filtros
