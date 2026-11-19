@@ -9,7 +9,7 @@ app.use(cors())
 app.use(express.json())
 
 async function buscarFilmesFiltrados(filtros) {
-  const { generoId, notaMinima, plataformaId } = filtros
+  const { generoId, notaMinima, plataformaId, atorId, diretorId, excluir } = filtros
   const token = process.env.TMDB_TOKEN
 
   let url = 'https://api.themoviedb.org/3/discover/movie?language=pt-BR'
@@ -23,6 +23,12 @@ async function buscarFilmesFiltrados(filtros) {
   if (plataformaId) {
     url += `&with_watch_providers=${plataformaId}&watch_region=BR`
   }
+  if (atorId) {
+    url += `&with_cast=${atorId}`
+  }
+  if (diretorId) {
+    url += `&with_crew=${diretorId}`
+  }
 
   const resposta = await fetch(url, {
     headers: {
@@ -31,12 +37,46 @@ async function buscarFilmesFiltrados(filtros) {
   })
 
   const dados = await resposta.json()
-  return dados.results // devolve a lista de filmes
+
+  // "12,345,678" (texto) → [12, 345, 678] (lista de números)
+  const idsExcluidos = excluir ? excluir.split(',').map(Number) : []
+
+  // mantém o filme só se o id dele NÃO está na lista de já assistidos
+  return dados.results.filter((filme) => !idsExcluidos.includes(filme.id))
 }
 
 app.get('/', (req, res) => {
   res.json({ mensagem: 'Back-end funcionando!' })
 })
+
+app.get('/api/pessoas', async (req,res)=> {
+  const token = process.env.TMDB_TOKEN
+  const {busca} = req.query
+  if (!busca){
+    return res.json([])
+  }
+  const resposta = await fetch(
+    `https://api.themoviedb.org/3/search/person?language=pt-BR&query=${encodeURIComponent(busca)}`,{
+      headers : {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+
+  )
+  const dados = await resposta.json()
+  const pessoas = dados.results
+    .filter((pessoa) => pessoa.known_for_department === 'Acting'||
+     pessoa.known_for_department=== 'Directing')
+    .slice(0, 5)
+    .map((pessoa) => ({
+      id: pessoa.id,
+      nome: pessoa.name,
+      foto: pessoa.profile_path,
+      funcao: pessoa.known_for_department === 'Directing' ? 'diretor' : 'ator',
+    }))
+  res.json(pessoas)
+})
+
 app.get('/api/generos', async ( req,res) => {
     const token = process.env.TMDB_TOKEN
     const resposta = await fetch(
