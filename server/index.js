@@ -124,7 +124,7 @@ const posicao = Math.floor(Math.random() * filmes.length)
 res.json(filmes[posicao])
 })
 
-const PORTA = 3001
+const PORTA = process.env.PORT || 3001 // no Render vem pela variável PORT; local usa 3001
 app.listen(PORTA, () => {
   console.log(`Servidor rodando em http://localhost:${PORTA}`)
 })
