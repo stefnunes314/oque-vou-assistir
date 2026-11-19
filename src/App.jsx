@@ -3,17 +3,13 @@ import './App.css'
 import cinemaImg from './assets/cinema.png'
 import { getGeneros, descobrirFilmes, sortearFilme, getCreditos, buscarPessoa } from './services/tmdb'
 
-// Todo o contato com o localStorage fica aqui.
-// Quando houver banco de dados, só estas duas funções mudam.
 const CHAVE_ASSISTIDOS = 'assistidos'
 
 function carregarAssistidos() {
-  // getItem devolve null se nunca salvamos nada, então usamos '[]' como padrão
   return JSON.parse(localStorage.getItem(CHAVE_ASSISTIDOS) || '[]')
 }
 
 function salvarAssistidos(lista) {
-  // o localStorage só guarda texto, então a lista vira texto antes de salvar
   localStorage.setItem(CHAVE_ASSISTIDOS, JSON.stringify(lista))
 }
 
@@ -26,16 +22,14 @@ function App() {
   const [filmeSorteado, setFilmeSorteado] = useState(null)
   const [creditos, setCreditos]= useState(null)
   const [semResultado, setSemResultado] = useState(false)
-  const [textoBusca, setTextoBusca] = useState('') // o que a pessoa digita
-  const [sugestoes, setSugestoes] = useState([]) // atores e diretores sugeridos
-  const [pessoaSelecionada, setPessoaSelecionada] = useState(null) // { id, nome, foto, funcao }
-  const [erro, setErro] = useState(false) // deu erro ao buscar?
-  const [tentativa, setTentativa] = useState(0) // contador do "Tentar de novo"
-  const [carregou, setCarregou] = useState(false) // já chegou a primeira lista de filmes?
-  // ids dos filmes já assistidos; começa lendo o que está salvo no navegador
+  const [textoBusca, setTextoBusca] = useState('')
+  const [sugestoes, setSugestoes] = useState([])
+  const [pessoaSelecionada, setPessoaSelecionada] = useState(null)
+  const [erro, setErro] = useState(false)
+  const [tentativa, setTentativa] = useState(0)
+  const [carregou, setCarregou] = useState(false)
   const [assistidos, setAssistidos] = useState(carregarAssistidos)
 
-  // cada filtro recebe o id só se a pessoa escolhida tem aquela função
   const atorId =
     pessoaSelecionada && pessoaSelecionada.funcao === 'ator'
       ? pessoaSelecionada.id
@@ -45,7 +39,6 @@ function App() {
       ? pessoaSelecionada.id
       : ''
 
-  // só mostra a lista se há texto suficiente, sugestões e ninguém já escolhido
   const mostrarSugestoes =
     !pessoaSelecionada && textoBusca.trim().length >= 2 && sugestoes.length > 0
 
@@ -62,23 +55,19 @@ function App() {
       .catch(() => setErro(true))
   }, [tentativa])
 
-  // Busca atores e diretores enquanto a pessoa digita (com debounce)
   useEffect(() => {
-    // sem texto suficiente, ou com alguém já escolhido, não busca
     if (pessoaSelecionada || textoBusca.trim().length < 2) {
       return
     }
 
-    // espera 400ms parado antes de buscar
     const temporizador = setTimeout(() => {
       buscarPessoa(textoBusca)
         .then((lista) => {
           setSugestoes(lista)
         })
-        .catch(() => setSugestoes([])) // sem sugestões, a barra só fica vazia
+        .catch(() => setSugestoes([]))
     }, 400)
 
-    // se digitar de novo antes dos 400ms, cancela o pedido anterior
     return () => clearTimeout(temporizador)
   }, [textoBusca, pessoaSelecionada])
 
@@ -99,14 +88,12 @@ function App() {
     .catch(() => setErro(true))
   }, [generoSelecionado, notaMinima, plataformaId, atorId, diretorId, assistidos, tentativa])
 
-  // Clique numa sugestão: guarda a pessoa (id, nome e função) e mostra o nome na barra
   function escolherPessoa(pessoa) {
     setPessoaSelecionada(pessoa)
     setTextoBusca(pessoa.nome)
     setSemResultado(false)
   }
 
-  // Botão "×": remove a pessoa do filtro
   function limparPessoa() {
     setPessoaSelecionada(null)
     setTextoBusca('')
@@ -114,7 +101,6 @@ function App() {
     setSemResultado(false)
   }
 
-  // Faz o sorteio de fato, excluindo os filmes da lista que receber
   function sortear(listaExcluidos) {
     sortearFilme({
       generoId: generoSelecionado,
@@ -132,24 +118,20 @@ function App() {
           .then((dados)=>{
             setCreditos(dados)
           })
-          .catch(() => setCreditos(null)) // os créditos são opcionais: o card aparece sem eles
+          .catch(() => setCreditos(null))
       }
     })
     .catch(() => setErro(true))
   }
 
-  // Botões de sortear: usam a lista de assistidos que já está no estado
   function handleSortear() {
     sortear(assistidos)
   }
 
-  // Botão "Já assisti": marca o filme da tela e já sorteia outro
   function handleJaAssisti() {
-    // cria uma lista NOVA (nunca altere o estado direto, o React não perceberia)
     const novaLista = [...assistidos, filmeSorteado.id]
     setAssistidos(novaLista)
     salvarAssistidos(novaLista)
-    // o setAssistidos só vale na próxima renderização, então passamos a lista nova direto
     sortear(novaLista)
   }
 
@@ -213,7 +195,7 @@ function App() {
           value={textoBusca}
           onChange={(evento) => {
             setTextoBusca(evento.target.value)
-            setPessoaSelecionada(null) // digitou de novo: a pessoa escolhida deixa de valer
+            setPessoaSelecionada(null)
             setSemResultado(false)
           }}
         />

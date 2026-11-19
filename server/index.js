@@ -38,10 +38,8 @@ async function buscarFilmesFiltrados(filtros) {
 
   const dados = await resposta.json()
 
-  // "12,345,678" (texto) → [12, 345, 678] (lista de números)
   const idsExcluidos = excluir ? excluir.split(',').map(Number) : []
 
-  // mantém o filme só se o id dele NÃO está na lista de já assistidos
   return dados.results.filter((filme) => !idsExcluidos.includes(filme.id))
 }
 
@@ -124,7 +122,7 @@ const posicao = Math.floor(Math.random() * filmes.length)
 res.json(filmes[posicao])
 })
 
-const PORTA = process.env.PORT || 3001 // no Render vem pela variável PORT; local usa 3001
+const PORTA = process.env.PORT || 3001
 app.listen(PORTA, () => {
   console.log(`Servidor rodando em http://localhost:${PORTA}`)
 })

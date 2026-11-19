@@ -1,7 +1,5 @@
 const API_URL = 'http://localhost:3001'
 
-// Faz a requisição e trata o erro num lugar só.
-// O fetch não reclama quando o servidor responde 500, por isso checamos o "ok".
 async function buscarJson(url) {
   const resposta = await fetch(url)
   if (!resposta.ok) {
